@@ -2,6 +2,7 @@
   "name": "benchmark",
   "version": "1.0.0",
   "main": "index.js",
+  "description": "A custom github action to run and comment benchmarks",
   "scripts": {
     "build": "microbundle -f cjs --define 'navigator={}' --compress --no-sourcemap --target node action.ts"
   },
