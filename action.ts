@@ -12,7 +12,6 @@ const run = async (octokit, context) => {
   const { owner, repo, number: pull_number } = context.issue;
 
   const pr = context.payload.pull_request;
-  console.log(pr);
   try {
     debug("pr" + JSON.stringify(pr, null, 2));
   } catch (e) {}
@@ -22,12 +21,12 @@ const run = async (octokit, context) => {
     );
   }
 
-  console.log(
-    `PR #${pull_number} is targetted at ${pr.base.ref} (${pr.base.sha})`
-  );
+  // console.log(
+  //   `PR #${pull_number} is targetted at ${pr.base.ref} (${pr.base.sha})`
+  // );
 
   const cwd = process.cwd();
-  console.log(cwd);
+  console.log(cwd, "Currently working in");
 
   const installScript = `yarn --frozen-lockfile`;
 
@@ -36,12 +35,15 @@ const run = async (octokit, context) => {
   await exec(installScript);
   endGroup();
 
+  startGroup(`[current] Displaying the file snad folders`);
+  console.log(`Files`);
+  await exec("ls");
+  endGroup();
+
   startGroup(`[current] Building and Bootstrapping with Lerna`);
   console.log(`Building and Bootstrapping with lerna`);
   await exec(`yarn build`);
   endGroup();
-
-  startGroup;
 };
 
 (async () => {
