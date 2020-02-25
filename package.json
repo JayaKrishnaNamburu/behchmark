@@ -1,24 +1,13 @@
 {
-  "name": "hello-world-javascript-action",
+  "name": "benchmark",
   "version": "1.0.0",
-  "description": "This action prints \"Hello World\" or \"Hello\" + the name of a person to greet to the log.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "microbundle -f cjs --define 'navigator={}' --compress --no-sourcemap --target node action.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/actions/hello-world-javascript-action.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/actions/hello-world-javascript-action/issues"
-  },
-  "homepage": "https://github.com/actions/hello-world-javascript-action#readme",
-  "dependencies": {
+  "devDependencies": {
     "@actions/core": "^1.1.0",
-    "@actions/github": "^1.1.0"
+    "@actions/github": "^1.1.0",
+    "microbundle": "^0.11.0"
   }
 }
