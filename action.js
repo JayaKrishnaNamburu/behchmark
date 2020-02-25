@@ -25,16 +25,17 @@ const run = async (octokit, context) => {
   const cwd = process.cwd();
   const installScript = `yarn --frozen-lockfile`;
 
-  startGroup(`[current] Installing Dependencies`);
-  console.log(`Installing Dependencies using ${installScript}`);
-  await exec(installScript);
-  endGroup();
+  // startGroup(`[current] Installing Dependencies`);
+  // console.log(`Installing Dependencies using ${installScript}`);
+  // await exec(installScript);
+  // endGroup();
 
-  startGroup(`[current] Building and Bootstrapping with Lerna`);
-  console.log(`Building and Bootstrapping with lerna`);
-  await exec(`yarn build`);
-  endGroup();
+  // startGroup(`[current] Building and Bootstrapping with Lerna`);
+  // console.log(`Building and Bootstrapping with lerna`);
+  // await exec(`yarn build`);
+  // endGroup();
 
+  console.log(cwd, "current working directory");
   startGroup(`[current] Displaying fodlers`);
   await exec(`ls`);
   endGroup();
@@ -61,8 +62,7 @@ const run = async (octokit, context) => {
       }
     };
 
-    await exec(`cd ${path.join(cwd, "/packages/teleport-test")}`);
-    await exec(`yarn benchmark`, [], options);
+    await exec(`node packages/teleport-test/src/bench.js`);
 
     console.log(`Error from running benchmarks ${myError}`);
 
