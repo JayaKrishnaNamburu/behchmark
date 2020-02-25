@@ -1,3 +1,4 @@
+import path from "path";
 import {
   getInput,
   setFailed,
@@ -21,13 +22,7 @@ const run = async (octokit, context) => {
     );
   }
 
-  // console.log(
-  //   `PR #${pull_number} is targetted at ${pr.base.ref} (${pr.base.sha})`
-  // );
-
   const cwd = process.cwd();
-  console.log(cwd, "Currently working in");
-
   const installScript = `yarn --frozen-lockfile`;
 
   startGroup(`[current] Installing Dependencies`);
@@ -35,15 +30,47 @@ const run = async (octokit, context) => {
   await exec(installScript);
   endGroup();
 
-  startGroup(`[current] Displaying the file snad folders`);
-  console.log(`Files`);
-  await exec("ls");
-  endGroup();
-
   startGroup(`[current] Building and Bootstrapping with Lerna`);
   console.log(`Building and Bootstrapping with lerna`);
   await exec(`yarn build`);
   endGroup();
+
+  startGroup(`[current] Displaying fodlers`);
+  await exec(`ls`);
+  endGroup();
+
+  startGroup(`[current] Running Benchmarks`);
+  console.log(`Running benchmarks`);
+
+  const benchmarkFile = path.resolve(
+    cwd,
+    "pacakges/teleport-test/src/bench.js"
+  );
+  if (benchmarkFile) {
+    let myOutput = "";
+    let myError = "";
+
+    const options = {};
+    // @ts-ignore
+    options.listeners = {
+      stdout: data => {
+        myOutput += data.toString();
+      },
+      stderr: data => {
+        myError += data.toString();
+      }
+    };
+
+    await exec(`cd ${path.join(cwd, "/packages/teleport-test")}`);
+    await exec(`yarn benchmark`, [], options);
+
+    console.log(`Error from running benchmarks ${myError}`);
+
+    console.log(`Output after running benchmark ${myOutput}`);
+  } else {
+    setFailed("Failed in finding the benchmark folder");
+    throw new Error("Failed in finding the benchmark folder");
+  }
 };
 
 (async () => {
