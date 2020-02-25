@@ -1,15 +1,52 @@
-import * as core from "@actions/core";
-import * as github from "@actions/github";
+import {
+  getInput,
+  setFailed,
+  debug,
+  startGroup,
+  endGroup
+} from "@actions/core";
+import { GitHub, context } from "@actions/github";
+import { exec } from "@actions/exec";
 
-try {
-  // `who-to-greet` input defined in action metadata file
-  const nameToGreet = core.getInput("who-to-greet");
-  console.log(`Hello ${nameToGreet}!`);
-  const time = new Date().toTimeString();
-  core.setOutput("time", time);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2);
-  console.log(`The event payload: ${payload}`);
-} catch (error) {
-  core.setFailed(error.message);
-}
+const run = async (octokit, context) => {
+  const { owner, repo, number: pull_number } = context.issue;
+
+  const pr = context.payload.pull_request;
+  console.log(pr);
+  try {
+    debug("pr" + JSON.stringify(pr, null, 2));
+  } catch (e) {}
+  if (!pr) {
+    throw Error(
+      `Could not retrieve PR information. Only "pull_request" triggered workflows are currently supported.`
+    );
+  }
+
+  console.log(
+    `PR #${pull_number} is targetted at ${pr.base.ref} (${pr.base.sha})`
+  );
+
+  const cwd = process.cwd();
+
+  startGroup(`[current] Installing Dependencies`);
+  console.log(`Installing Dependencies using ${installScript}`);
+  await exec(`yarn --frozen-lockfile`);
+  endGroup();
+
+  startGroup(`[current] Building and Bootstrapping with Lerna`);
+  console.log(`Building and Bootstrapping with lerna`);
+  await exec(`yarn build`);
+  endGroup();
+
+  startGroup;
+};
+
+(async () => {
+  try {
+    const token = getInput("secret-token", { required: true });
+    const octokit = new GitHub(token);
+    await run(octokit, context);
+  } catch (e) {
+    setFailed(e.message);
+  }
+})();

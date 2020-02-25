@@ -3,13 +3,9 @@ on: [push]
 jobs:
   hello_world_job:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    name: A job to run and comment benchmark details
+
     steps:
-      - name: Hello world action step
-        id: hello
-        uses: JayaKrishnaNamburu/behchmark@master
+      - uses: JayaKrishnaNamburu/behchmark@master
         with:
-          who-to-greet: "Mona the Octocat"
-      # Use the output from the `hello` step
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
+          secret-token: "${{ secrets.GITHUB_TOKEN }}"
