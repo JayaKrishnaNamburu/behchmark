@@ -8,4 +8,4 @@ jobs:
     steps:
       - uses: JayaKrishnaNamburu/behchmark@master
         with:
-          secret-token: "${{ secrets.GITHUB_TOKEN }}"
+          secret-token: "${{ secrets.BENCHMARK_TOKEN }}"

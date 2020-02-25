@@ -27,6 +27,7 @@ const run = async (octokit, context) => {
   );
 
   const cwd = process.cwd();
+  console.log(cwd);
 
   startGroup(`[current] Installing Dependencies`);
   console.log(`Installing Dependencies using ${installScript}`);
