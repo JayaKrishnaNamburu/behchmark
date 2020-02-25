@@ -29,9 +29,11 @@ const run = async (octokit, context) => {
   const cwd = process.cwd();
   console.log(cwd);
 
+  const installScript = `yarn --frozen-lockfile`;
+
   startGroup(`[current] Installing Dependencies`);
   console.log(`Installing Dependencies using ${installScript}`);
-  await exec(`yarn --frozen-lockfile`);
+  await exec(installScript);
   endGroup();
 
   startGroup(`[current] Building and Bootstrapping with Lerna`);
