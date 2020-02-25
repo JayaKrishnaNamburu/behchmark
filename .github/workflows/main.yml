@@ -6,6 +6,7 @@ jobs:
     name: Benchmarking the generators
 
     steps:
+      - uses: actions/checkout@v2
       - uses: JayaKrishnaNamburu/behchmark@development
         with:
           secret-token: "${{ secrets.BENCHMARK_TOKEN }}"
