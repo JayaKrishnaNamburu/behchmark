@@ -1,43 +1,42 @@
 import path from "path";
-import {
-  getInput,
-  setFailed,
-  debug,
-  startGroup,
-  endGroup
-} from "@actions/core";
-import { GitHub, context } from "@actions/github";
+import { getInput, setFailed, startGroup, endGroup } from "@actions/core";
 import { exec } from "@actions/exec";
 
-const run = async (context, customPath) => {
-  const pr = context.payload.pull_request;
-  try {
-    debug("pr" + JSON.stringify(pr, null, 2));
-  } catch (e) {}
-  if (!pr) {
-    throw Error(
-      `Could not retrieve PR information. Only "pull_request" triggered workflows are currently supported.`
-    );
-  }
+const run = async options => {
+  const { customPath, lint, test, coverage } = options;
 
   const cwd = process.cwd();
   const installScript = `yarn --frozen-lockfile`;
 
-  startGroup(`[current] Installing Dependencies`);
+  startGroup(`[Dependencies] Installing Dependencies`);
   console.log(`Installing Dependencies using ${installScript}`);
   await exec(installScript);
   endGroup();
 
-  startGroup(`[current] Building and Bootstrapping with Lerna`);
+  startGroup(`[Building] Building and Bootstrapping with Lerna`);
   console.log(`Building and Bootstrapping with lerna`);
   await exec(`yarn build`);
   endGroup();
 
-  startGroup(`[current] Displaying fodlers`);
-  await exec(`ls`);
-  endGroup();
+  if (lint) {
+    startGroup(`[Linting] Running lint on all files`);
+    await exec(`yarn lint`);
+    endGroup();
+  }
 
-  startGroup(`[current] Running Benchmarks`);
+  if (test) {
+    startGroup(`[Tests] Running test cases`);
+    await exec(test);
+    endGroup();
+  }
+
+  if (coverage) {
+    startGroup(`[Coverage] Uploading coverage`);
+    await exec(coverage);
+    endGroup();
+  }
+
+  startGroup(`[Benchmarking] Running Benchmarks`);
   console.log(`Running benchmarks`);
 
   const benchmarkFilePath = customPath ? customPath : "bench.js";
@@ -46,7 +45,7 @@ const run = async (context, customPath) => {
   console.log(`Executing benchmark at ${benchFile}`);
 
   if (benchFile) {
-    await exec(`node ${benchmarkFilePath}`, options);
+    await exec(`node ${benchmarkFilePath}`);
     endGroup();
   } else {
     setFailed("Failed in finding the benchmark folder");
@@ -59,7 +58,16 @@ const run = async (context, customPath) => {
 (async () => {
   try {
     const customPath = getInput("benchmark-path");
-    await run(context, customPath);
+    const lint = getInput("lint") ? true : false;
+    const test = getInput("test");
+    const coverage = getInput("coverage");
+    const options = {
+      customPath,
+      lint,
+      test,
+      coverage
+    };
+    await run(options);
   } catch (e) {
     setFailed(e.message);
   }
