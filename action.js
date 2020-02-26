@@ -61,7 +61,7 @@ const run = async (octokit, context) => {
       }
     };
 
-    await exec(`node packages/teleport-test/src/bench.js`);
+    await exec(`node packages/teleport-test/src/bench.js`, options);
 
     console.log(`Error from running benchmarks ${myError}`);
 
