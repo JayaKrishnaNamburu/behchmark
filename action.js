@@ -25,17 +25,16 @@ const run = async (octokit, context) => {
   const cwd = process.cwd();
   const installScript = `yarn --frozen-lockfile`;
 
-  // startGroup(`[current] Installing Dependencies`);
-  // console.log(`Installing Dependencies using ${installScript}`);
-  // await exec(installScript);
-  // endGroup();
+  startGroup(`[current] Installing Dependencies`);
+  console.log(`Installing Dependencies using ${installScript}`);
+  await exec(installScript);
+  endGroup();
 
-  // startGroup(`[current] Building and Bootstrapping with Lerna`);
-  // console.log(`Building and Bootstrapping with lerna`);
-  // await exec(`yarn build`);
-  // endGroup();
+  startGroup(`[current] Building and Bootstrapping with Lerna`);
+  console.log(`Building and Bootstrapping with lerna`);
+  await exec(`yarn build`);
+  endGroup();
 
-  console.log(cwd, "current working directory");
   startGroup(`[current] Displaying fodlers`);
   await exec(`ls`);
   endGroup();
@@ -67,6 +66,7 @@ const run = async (octokit, context) => {
     console.log(`Error from running benchmarks ${myError}`);
 
     console.log(`Output after running benchmark ${myOutput}`);
+    endGroup();
   } else {
     setFailed("Failed in finding the benchmark folder");
     throw new Error("Failed in finding the benchmark folder");
