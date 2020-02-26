@@ -1,3 +1,4 @@
+import path from "path";
 import {
   getInput,
   setFailed,
@@ -12,7 +13,6 @@ const run = async (octokit, context) => {
   const { owner, repo, number: pull_number } = context.issue;
 
   const pr = context.payload.pull_request;
-  console.log(pr);
   try {
     debug("pr" + JSON.stringify(pr, null, 2));
   } catch (e) {}
@@ -22,13 +22,7 @@ const run = async (octokit, context) => {
     );
   }
 
-  console.log(
-    `PR #${pull_number} is targetted at ${pr.base.ref} (${pr.base.sha})`
-  );
-
   const cwd = process.cwd();
-  console.log(cwd);
-
   const installScript = `yarn --frozen-lockfile`;
 
   startGroup(`[current] Installing Dependencies`);
@@ -41,7 +35,42 @@ const run = async (octokit, context) => {
   await exec(`yarn build`);
   endGroup();
 
-  startGroup;
+  startGroup(`[current] Displaying fodlers`);
+  await exec(`ls`);
+  endGroup();
+
+  startGroup(`[current] Running Benchmarks`);
+  console.log(`Running benchmarks`);
+
+  const benchmarkFile = path.resolve(
+    cwd,
+    "pacakges/teleport-test/src/bench.js"
+  );
+  if (benchmarkFile) {
+    let myOutput = "";
+    let myError = "";
+
+    const options = {};
+    // @ts-ignore
+    options.listeners = {
+      stdout: data => {
+        myOutput += data.toString();
+      },
+      stderr: data => {
+        myError += data.toString();
+      }
+    };
+
+    await exec(`node packages/teleport-test/src/bench.js`);
+
+    console.log(`Error from running benchmarks ${myError}`);
+
+    console.log(`Output after running benchmark ${myOutput}`);
+    endGroup();
+  } else {
+    setFailed("Failed in finding the benchmark folder");
+    throw new Error("Failed in finding the benchmark folder");
+  }
 };
 
 (async () => {
