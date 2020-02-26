@@ -9,9 +9,7 @@ import {
 import { GitHub, context } from "@actions/github";
 import { exec } from "@actions/exec";
 
-const run = async (octokit, context) => {
-  const { owner, repo, number: pull_number } = context.issue;
-
+const run = async (context, customPath) => {
   const pr = context.payload.pull_request;
   try {
     debug("pr" + JSON.stringify(pr, null, 2));
@@ -42,42 +40,26 @@ const run = async (octokit, context) => {
   startGroup(`[current] Running Benchmarks`);
   console.log(`Running benchmarks`);
 
-  const benchmarkFile = path.resolve(
-    cwd,
-    "pacakges/teleport-test/src/bench.js"
-  );
-  if (benchmarkFile) {
-    let myOutput = "";
-    let myError = "";
+  const benchmarkFilePath = customPath ? customPath : "bench.js";
+  const benchFile = path.resolve(cwd, benchmarkFilePath);
 
-    const options = {};
-    // @ts-ignore
-    options.listeners = {
-      stdout: data => {
-        myOutput += data.toString();
-      },
-      stderr: data => {
-        myError += data.toString();
-      }
-    };
+  console.log(`Executing benchmark at ${benchFile}`);
 
-    await exec(`node packages/teleport-test/src/bench.js`, options);
-
-    console.log(`Error from running benchmarks ${myError}`);
-
-    console.log(`Output after running benchmark ${myOutput}`);
+  if (benchFile) {
+    await exec(`node ${benchmarkFilePath}`, options);
     endGroup();
   } else {
     setFailed("Failed in finding the benchmark folder");
-    throw new Error("Failed in finding the benchmark folder");
+    throw new Error(
+      `Failed in finding the benchmark folder, working directory ${cwd}`
+    );
   }
 };
 
 (async () => {
   try {
-    const token = getInput("secret-token", { required: true });
-    const octokit = new GitHub(token);
-    await run(octokit, context);
+    const customPath = getInput("benchmark-path");
+    await run(context, customPath);
   } catch (e) {
     setFailed(e.message);
   }
